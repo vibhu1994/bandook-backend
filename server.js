@@ -215,6 +215,65 @@ app.post('/api/auto-rename', async (req, res) => {
   }
 });
 
+// 1. For Strava webhook verification
+app.get('/webhook', (req, res) => {
+  // Strava's subscription challenge uses 'hub.challenge'
+  const challenge = req.query['hub.challenge'];
+  if (challenge) {
+    res.status(200).send(challenge);
+  } else {
+    res.status(400).send('No challenge token');
+  }
+});
+
+// 2. For receiving webhook activity events
+app.post('/webhook', async (req, res) => {
+  // Respond instantly, then handle logic (Strava expects a 2xx fast response)
+  res.status(200).send('EVENT_RECEIVED');
+
+  try {
+    const { aspect_type, object_type, object_id, owner_id } = req.body;
+    // Only proceed if it's a new activity creation
+    if (object_type === 'activity' && aspect_type === 'create') {
+      // === FOR SINGLE USER ONLY ===
+      // Replace this line with your Strava athlete ID as a number (find it in your token/profile)
+      const yourAthleteId = <YOUR_ATHLETE_ID>;
+      // And load your latest access token (see below)
+      const token = process.env.STRAVA_ACCESS_TOKEN; // OR load securely from your .env/config
+      
+      if (Number(owner_id) !== Number(yourAthleteId)) {
+        // Ignore events for other users
+        return;
+      }
+      // Fetch the activity details to read the original name
+      const activityResponse = await axios.get(
+        `https://www.strava.com/api/v3/activities/${object_id}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const activity = activityResponse.data;
+
+      if (defaultActivityNames.includes(activity.name)) {
+        // Pick a dialogue and format
+        if (dialogues.length === 0) return;
+        const d = dialogues[Math.floor(Math.random() * dialogues.length)];
+        const name = d.dialogue;
+        const description = `— ${d.movie} (${d.year})\n${defaultDescription}`;
+
+        await axios.put(
+          `https://www.strava.com/api/v3/activities/${object_id}`,
+          { name, description },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        console.log(`Auto-renamed activity ${object_id} [${activity.name}] to "${name}"`);
+      }
+    }
+  } catch (e) {
+    console.error('Error in webhook handler:', e.response?.data || e.message);
+  }
+});
+
+
+
 // Start server
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server listening on port ${PORT}`);
