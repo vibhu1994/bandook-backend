@@ -201,6 +201,7 @@ app.post('/api/auto-rename', async (req, res) => {
 });
 
 // 8. Strava Webhook GET Endpoint - for subscription verification
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'your_secret_verify_token'; // set in .env
 app.get('/webhook', (req, res) => {
   console.log('Webhook challenge:', {
     mode: req.query['hub.mode'],
@@ -213,8 +214,7 @@ app.get('/webhook', (req, res) => {
   const token = req.query['hub.verify_token'];
   const challenge = req.query['hub.challenge'];
 
-  const VERIFY_TOKEN = process.env.VERIFY_TOKEN || 'your_secret_verify_token'; // set in .env
-
+  
   if (mode === 'subscribe' && token === VERIFY_TOKEN) {
     console.log(`Webhook verified with challenge: ${challenge}`);
     res.status(200).send(challenge);
