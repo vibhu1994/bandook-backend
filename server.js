@@ -45,7 +45,7 @@ loadDialogues();
 const defaultActivityNames = [
   "Morning Run",
   "Evening Run",
-  "Run",
+  "Night Run",
   "Workout",
   "Ride",
   "Evening Ride",
