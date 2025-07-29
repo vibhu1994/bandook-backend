@@ -241,7 +241,7 @@ app.get('/webhook', (req, res) => {
   const challenge = req.query['hub.challenge'];
 
   if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-    res.status(200).send(challenge);
+    res.status(200).json({ "hub.challenge": challenge });
   } else {
     res.status(403).send('Forbidden');
   }
