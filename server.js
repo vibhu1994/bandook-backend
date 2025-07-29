@@ -237,10 +237,10 @@ app.post('/webhook', async (req, res) => {
     if (object_type === 'activity' && aspect_type === 'create') {
       // === FOR SINGLE USER ONLY ===
       // Replace this line with your Strava athlete ID as a number (find it in your token/profile)
-      const yourAthleteId = <YOUR_ATHLETE_ID>;
+      const yourAthleteId = Number(process.env.STRAVA_ATHLETE_ID);
       // And load your latest access token (see below)
-      const token = process.env.STRAVA_ACCESS_TOKEN; // OR load securely from your .env/config
-      
+      const token = process.env.STRAVA_ACCESS_TOKEN;
+
       if (Number(owner_id) !== Number(yourAthleteId)) {
         // Ignore events for other users
         return;
