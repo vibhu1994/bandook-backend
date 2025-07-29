@@ -92,6 +92,7 @@ async function getFreshAccessToken() {
 }
 
 // ==== ROUTES ====
+app.use(express.json());
 
 // 1. OAuth: Exchange code for tokens and auto-write tokens.json
 app.post('/api/token', async (req, res) => {
