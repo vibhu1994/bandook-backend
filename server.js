@@ -217,7 +217,7 @@ app.get('/webhook', (req, res) => {
   
   if (mode === 'subscribe' && token === VERIFY_TOKEN) {
     console.log(`Webhook verified with challenge: ${challenge}`);
-    res.status(200).send(challenge);
+    res.status(200).json({ "hub.challenge": challenge });
   } else {
     console.warn('Webhook verification failed due to bad token or mode');
     res.status(403).send('Forbidden');
